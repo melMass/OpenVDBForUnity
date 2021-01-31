@@ -1,7 +1,7 @@
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
+
 using UnityEngine;
 using UnityEditor;
 using UnityEngine.Networking;
@@ -27,7 +27,7 @@ namespace OpenVDB.PackageBuild
 
         const string LibraryDestFolder = "OpenVDB/Scripts/Plugins/{0}/";
 
-        static LibraryPackageInfo[] Infos = 
+        static LibraryPackageInfo[] Infos =
         {
             new LibraryPackageInfo { target = BuildTarget.StandaloneWindows, arch = "x86", packageId = "07a258b63529b1a6b9517b05bd8057994689b8eb" },
             new LibraryPackageInfo { target = BuildTarget.StandaloneWindows64, arch = "x86_64", packageId = "2c0ede688cb6609cf77dafa57a7200b861971804" },
@@ -79,7 +79,7 @@ namespace OpenVDB.PackageBuild
                     var src = Path.Combine(extractPath, folderName);
                     if (!Directory.Exists(src))
                         continue;
-                    
+
                     var dest = Path.Combine(Application.dataPath, string.Format(LibraryDestFolder, info.arch));
                     if (!Directory.Exists(dest))
                     {
@@ -88,7 +88,7 @@ namespace OpenVDB.PackageBuild
                     Debug.LogFormat("Copy file {0}, Destination Directory {1}", src, dest);
                     var paths = CopyFiles(src, dest);
 
-                    UpdatePluginImporterSettings(paths.Select(_ => MakeShortAssetPath(_)).ToArray(), info.target);
+                    UpdatePluginImporterSettings(paths.Select(MakeShortAssetPath).ToArray(), info.target);
                 }
             }
             return true;
@@ -125,7 +125,7 @@ namespace OpenVDB.PackageBuild
                 {
                     System.Threading.Thread.Sleep(100);
                 }
-                if(request.isHttpError || request.isNetworkError)
+                if(request.result == UnityWebRequest.Result.ProtocolError || request.result == UnityWebRequest.Result.ConnectionError)
                 {
                     return null;
                 }
@@ -135,7 +135,7 @@ namespace OpenVDB.PackageBuild
         }
 
 
-        public static void ExtractTGZ(string gzArchiveName, string destFolder) 
+        public static void ExtractTGZ(string gzArchiveName, string destFolder)
         {
             var inStream = File.OpenRead(gzArchiveName);
             var gzipStream = new GZipInputStream(inStream);
@@ -183,7 +183,7 @@ namespace OpenVDB.PackageBuild
                 AssetDatabase.ImportAsset(path);
             }
 
-            var importers = paths.Select(AssetImporter.GetAtPath).Where (_importer => _importer is PluginImporter).Cast<PluginImporter>();
+            var importers = paths.Select(AssetImporter.GetAtPath).Where (importer => importer is PluginImporter).Cast<PluginImporter>();
 
             foreach (var importer in importers)
             {

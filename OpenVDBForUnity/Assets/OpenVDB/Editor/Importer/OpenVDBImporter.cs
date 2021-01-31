@@ -4,10 +4,9 @@ using System;
 using UnityEngine;
 using System.IO;
 using System.Linq;
-using UnityEditor.Experimental.AssetImporters;
 using System.Text.RegularExpressions;
 using Extensions;
-using UnityEditor;
+using UnityEditor.AssetImporters;
 using Object = UnityEngine.Object;
 
 namespace OpenVDB
@@ -29,10 +28,8 @@ namespace OpenVDB
             {
                 return Path.Combine(Path.GetDirectoryName(Application.dataPath), assetPath);
             }
-            else
-            {
-                return Path.Combine(Application.dataPath, assetPath);
-            }
+
+            return Path.Combine(Application.dataPath, assetPath);
         }
 
         public override void OnImportAsset(AssetImportContext ctx)
@@ -98,6 +95,7 @@ namespace OpenVDB
                     return m_defaultMaterial;
                 }
             }
+
             public void Add(string identifier, Object asset)
             {
 #if UNITY_2017_3_OR_NEWER
@@ -117,7 +115,7 @@ namespace OpenVDB
         {
             var go = stream.gameObject;
             Texture texture = null;
-            
+
             if (descriptor.settings.extractTextures)
             {
                 texture = descriptor.settings.textures.First();
@@ -131,7 +129,7 @@ namespace OpenVDB
                     subassets.Add(stream.texture3D.name, stream.texture3D);
                 }
             }
-            
+
             var meshFilter = go.GetOrAddComponent<MeshFilter>();
             if (meshFilter != null)
             {
@@ -139,6 +137,7 @@ namespace OpenVDB
                 meshFilter.sharedMesh.name = go.name;
                 subassets.Add(meshFilter.sharedMesh.name, meshFilter.sharedMesh);
             }
+
             var renderer = go.GetOrAddComponent<MeshRenderer>();
             if (renderer == null) return;
             if (!descriptor.settings.importMaterials) return;
@@ -156,7 +155,6 @@ namespace OpenVDB
             if (texture == null) return;
             renderer.sharedMaterial.SetTexture("_Volume", texture);
             renderer.sharedMaterial.name = texture.name;
-
         }
     }
 }
